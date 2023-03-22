@@ -1,7 +1,0 @@
-# DistroTube - Condigurn DWM's panel is esasy with dwmblocks
-https://www.youtube.com/watch?v=05viW41bMaw
-
-  Muestra el comando xsetroot -name "xxxxx"  
-  dwmblocks version: https://github.com/torrinfail/dwmblocks
-
-
