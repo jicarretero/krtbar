@@ -11,6 +11,10 @@
 
 extern int errno;
 
+#define pomodoro_color "^c#30f0ff^"
+#define pomodoro_paused "^c#ff0000^"
+#define pomodoro_break "^c#ffff00^"
+
 int get_connection() {
   struct sockaddr_in server, cli;
   int s;
@@ -41,10 +45,23 @@ void get_pomodoro_status(char *buffer) {
   int s = get_connection();
   write(s, buf, strlen(buf));
   int b = read(s, recbuf, 2048);
+
   if (b == -1)
     snprintf(buffer, max, " NO POMODORO %d", errno);
-  else
-    snprintf(buffer, max, " %s", recbuf);
+  else {
+    char *pm_t = strtok(recbuf, " "); /* time */
+    char *pm_s = strtok(NULL, " ");   /* stopped or started */
+    char *pm_w = strtok(NULL, " ");   /* POMODORO or stopped */
+    char *color;
+    if (strncmp(pm_s, "stopped", 8) == 0)
+      color = pomodoro_paused;
+    else if (strncmp(pm_w, "POMODORO", 9) == 0)
+      color = pomodoro_color;
+    else
+      color = pomodoro_break;
+
+    snprintf(buffer, max, "%s %s", color, pm_t);
+  }
   close_connection(s);
 }
 

@@ -4,7 +4,7 @@ build_dir=build
 LIBS=-lX11 -lcjson
 
 all: 
-	gcc $(DEBUG) bar.c util.c krtpomodoroclient.c weather.c kbarsignals.c -o krtbar $(LIBS)
+	gcc $(DEBUG) bar.c util.c krtpomodoroclient.c weather.c kbarsignals.c klog.c -o krtbar $(LIBS)
 
 clean:
 	rm -rf krtbar 

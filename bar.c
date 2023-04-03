@@ -37,8 +37,26 @@ void get_date_time(char *buffer) {
   time_t t = time(NULL);
   struct tm *tm = localtime(&t);
 
-  size_t ret =
-      strftime(buffer, MAX_COMPONENT_BUFFER, " %a %d-%m-%Y %H:%M:%S", tm);
+  size_t ret = strftime(buffer, MAX_COMPONENT_BUFFER, " %d-%m-%Y %H:%M", tm);
+  /* strftime(buffer, MAX_COMPONENT_BUFFER, " %a %d-%m-%Y %H:%M:%S", tm);*/
+}
+
+void exec_command(const char *command, char *buffer) {
+  FILE *fp;
+
+  /* Open the command for reading. */
+  fp = popen(command, "r");
+  if (fp == NULL) {
+    printf("Failed to run command\n");
+    exit(1);
+  }
+
+  /* Read the output a line at a time - output it. */
+  while (fgets(buffer, MAX_COMPONENT_BUFFER, fp) != NULL)
+    ;
+
+  /* close */
+  pclose(fp);
 }
 
 uintmax_t read_memory() {
@@ -141,7 +159,8 @@ int main_loop() {
                             {get_pomodoro_status, NULL, fg2, bg2},
                             {get_battery_state, NULL, fg1, bg1},
                             {get_used_mem, NULL, fg2, bg2},
-                            {get_date_time, NULL, fg1, bg1}};
+                            {NULL, "/home/jicg/bin/qsound.sh", fg1, bg1},
+                            {get_date_time, NULL, fg2, bg2}};
   size_t cl = sizeof(components) / sizeof(component);
 
   const char *buffer_weather = components[0].buffer;
@@ -151,11 +170,6 @@ int main_loop() {
   const char *tm_buffer = components[4].buffer;
 
   do {
-    /* get_date_time(tm_buffer, 64);
-    get_used_mem(mem_buffer, 64);
-    get_battery_state(battery_buffer, 64);
-    get_pomodoro_status(buffer_pomodoro, 64);
-    get_weather(buffer_weather, 128);*/
     char cr[] = {(char)31, '\0'};
     char output[8192] = {0};
     component *c = components;
@@ -163,25 +177,21 @@ int main_loop() {
     for (int i = 0; i < cl; i++, c++) {
       char bg[10];
       strncpy(bg, c->bg_color, 10);
-      c->fn(c->buffer);
+      if (c->fn)
+        c->fn(c->buffer);
+      else if (c->s)
+        exec_command(c->s, c->buffer);
+
       strncat(output, bg, 8000);
       bg[1] = 'c';
       strncat(output, bg, 8000);
       strncat(output, cr, 8000);
       strncat(output, " ", 8000);
       strncat(output, c->fg_color, 8000);
-      strncat(output, c->fg_color, 8000);
       strncat(output, c->buffer, 8000);
       strncat(output, " ", 8000);
     }
 
-    /* snprintf(full_buffer, 2048,
-             "%c%s%s %s %c%s%s %s %c%s%s %s %c%s%s %s %c%s%s %s ", cr, fg1, bg1,
-             buffer_weather, cr, fg2, bg2, buffer_pomodoro, cr, fg1, bg1,
-             battery_buffer, cr, fg2, bg2, mem_buffer, cr, fg1, bg1,
-       tm_buffer);*/
-
-    /*    write_status(full_buffer); */
     write_status(output);
     sleep(1);
 

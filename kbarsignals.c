@@ -13,7 +13,6 @@ void run(char *cmd) {
   pid_t p = fork();
   if (p == 0) {
     execvp(cmd, a);
-    printf("El hijo que ha salido rana");
   }
 }
 
@@ -25,6 +24,8 @@ void signal_handler(int signum, siginfo_t *info, void *context) {
     if (blk == 2)
       toggle_pomodoro();
   if (blk == 5)
+    run("/usr/bin/pavucontrol");
+  if (blk == 6)
     run("/usr/bin/gsimplecal");
 }
 
