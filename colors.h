@@ -22,3 +22,8 @@
 
 #define BG_DEFAULT "^b#282a36^"
 #define FG_DEFAULT "^c#282a36^"
+
+#define FG1 "^c#f3f4f5^" // color 5
+#define FG2 "^c#f3f4f5^" // color 5
+#define BG1 "^b#2F343F^" // color 0
+#define BG2 "^b#4b566a^" // color 9

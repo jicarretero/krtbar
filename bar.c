@@ -1,4 +1,5 @@
 #include "colors.h"
+#include "config.h"
 #include "util.h"
 #include <X11/Xlib.h>
 #include <locale.h>
@@ -13,31 +14,20 @@
 
 typedef __uintmax_t uintmax_t;
 
-typedef enum { FUNCTION = 0, STRING = 1 } component_type;
-
-#define COMPONENT_LIMIT (char)31
-#define MAX_COMPONENT_BUFFER 2048
-
-typedef struct component {
-  void (*fn)(char *);
-  const char *s;
-  char *fg_color;
-  char *bg_color;
-  char buffer[MAX_COMPONENT_BUFFER];
-} component;
-
 void gw(char *buffer) {}
-
 extern void get_pomodoro_status(char *buffer);
 extern void setupsignals();
+extern void abrthandler();
+extern void chldhandler();
 
-void get_weather(char *output);
+component_control *p_components;
 
 void get_date_time(char *buffer) {
   time_t t = time(NULL);
   struct tm *tm = localtime(&t);
 
-  size_t ret = strftime(buffer, MAX_COMPONENT_BUFFER, " %d-%m-%Y %H:%M", tm);
+  size_t ret =
+      strftime(buffer, MAX_COMPONENT_BUFFER, " %d-%m-%Y %H:%M:%S", tm);
   /* strftime(buffer, MAX_COMPONENT_BUFFER, " %a %d-%m-%Y %H:%M:%S", tm);*/
 }
 
@@ -134,12 +124,6 @@ void openx() {
 
 void closex() { XCloseDisplay(dpy); }
 
-void chldhandler(int sig) {
-  waitpid(-1, NULL, 0);
-  return;
-}
-void abrthandler(int sig) { abort(); }
-
 int main_loop() {
   sleep(2);
   setlocale(LC_CTYPE, "");
@@ -147,40 +131,29 @@ int main_loop() {
 
   char full_buffer[2048];
 
-  char *bg1 = BG_COLOR_0;
-  char *fg1 = FG_COLOR_5;
-
-  char *bg2 = BG_COLOR_9;
-  char *fg2 = FG_COLOR_5;
-
   openx();
 
-  component components[] = {{get_weather, NULL, fg1, bg1},
-                            {get_pomodoro_status, NULL, fg2, bg2},
-                            {get_battery_state, NULL, fg1, bg1},
-                            {get_used_mem, NULL, fg2, bg2},
-                            {NULL, "/home/jicg/bin/qsound.sh", fg1, bg1},
-                            {get_date_time, NULL, fg2, bg2}};
   size_t cl = sizeof(components) / sizeof(component);
 
-  const char *buffer_weather = components[0].buffer;
+  /* const char *buffer_weather = components[0].buffer;
   const char *buffer_pomodoro = components[1].buffer;
   const char *battery_buffer = components[2].buffer;
   const char *mem_buffer = components[3].buffer;
-  const char *tm_buffer = components[4].buffer;
+  const char *tm_buffer = components[4].buffer; */
 
   do {
     char cr[] = {(char)31, '\0'};
     char output[8192] = {0};
-    component *c = components;
+    component_control *cc = (component_control *)p_components;
     char fgfoocolor[20] = {};
-    for (int i = 0; i < cl; i++, c++) {
+    for (int i = 0; i < cl; i++, cc++) {
+      const component *c = cc->p_component;
       char bg[10];
       strncpy(bg, c->bg_color, 10);
       if (c->fn)
-        c->fn(c->buffer);
+        c->fn(cc->buffer);
       else if (c->s)
-        exec_command(c->s, c->buffer);
+        exec_command(c->s, cc->buffer);
 
       strncat(output, bg, 8000);
       bg[1] = 'c';
@@ -188,7 +161,7 @@ int main_loop() {
       strncat(output, cr, 8000);
       strncat(output, " ", 8000);
       strncat(output, c->fg_color, 8000);
-      strncat(output, c->buffer, 8000);
+      strncat(output, cc->buffer, 8000);
       strncat(output, " ", 8000);
     }
 
@@ -206,15 +179,13 @@ int main() {
   setupsignals();
   signal(SIGCHLD, chldhandler);
 
-  main_loop();
+  size_t cl = sizeof(components) / sizeof(component);
 
-  /* while ((pid = fork()) >= 0) {
-    if (pid == 0) {
-      main_loop();
-    } else {
-      signal(SIGCHLD, chldhandler);
-      waitpid(pid, NULL, 0);
-    }
-    sleep(1);
-  } */
+  p_components = calloc(cl, sizeof(component_control));
+
+  for (int i = 0; i < cl; i++) {
+    p_components[i].p_component = &components[i];
+  }
+
+  main_loop();
 }

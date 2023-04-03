@@ -1,32 +1,55 @@
+#include "config.h"
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+#include <wait.h>
 
 extern void toggle_pomodoro();
 
-// execvp(cmd, argv); //This will run "ls -la" as if it were a command
+extern component_control *p_components;
 
-void run(char *cmd) {
-  char *a[2];
-  a[0] = cmd;
-  a[1] = NULL;
+// execvp(cmd, argv); //This will run "ls -la" as if it were a command
+pid_t run(const char *cmd) {
+  char *b = strndup(cmd, MAX_COMPONENT_BUFFER);
+  char *tokens[1024] = {NULL};
+  char *tok = strtok(b, " \t");
+  int i = 0;
+  tokens[i++] = tok;
+  while ((tok = strtok(NULL, " \t"))) {
+    tokens[i++] = tok;
+  }
   pid_t p = fork();
   if (p == 0) {
-    execvp(cmd, a);
+    execvp(tokens[0], tokens);
   }
+  return p;
 }
 
+void chldhandler(int sig) {
+  pid_t pid = waitpid(-1, NULL, 0);
+  size_t cl = sizeof(components) / sizeof(component);
+
+  for (int i = 0; i < cl; i++) {
+    if (pid == p_components[i].pid) {
+      p_components[i].pid = 0;
+      break;
+    }
+  }
+
+  return;
+}
+
+void abrthandler(int sig) { abort(); }
+
 void signal_handler(int signum, siginfo_t *info, void *context) {
-  /* printf("Received signal: %d and info %d [%d]\n", signum,
-         info->si_value.sival_int, SIGRTMIN); */
-  int blk = info->si_value.sival_int;
-  if (signum == SIGRTMIN)
-    if (blk == 2)
-      toggle_pomodoro();
-  if (blk == 5)
-    run("/usr/bin/pavucontrol");
-  if (blk == 6)
-    run("/usr/bin/gsimplecal");
+  int blk = info->si_value.sival_int - 1;
+  if (signum == SIGRTMIN) {
+    component_control *c = &p_components[blk];
+    if (c->pid == 0 && c->p_component->on_click)
+      c->pid = run(c->p_component->on_click);
+  }
 }
 
 void buttonhandler(int sig, siginfo_t *si, void *ucontext) {
@@ -53,6 +76,7 @@ void buttonhandler(int sig, siginfo_t *si, void *ucontext) {
 
 void setupsignals() {
   struct sigaction sa;
+  printf("Setting up signals\n");
 
   for (int i = 0; i < 20; i++) {
     struct sigaction sa;
