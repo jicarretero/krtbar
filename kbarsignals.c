@@ -49,6 +49,8 @@ void signal_handler(int signum, siginfo_t *info, void *context) {
     component_control *c = &p_components[blk];
     if (c->pid == 0 && c->p_component->on_click)
       c->pid = run(c->p_component->on_click);
+    else if (c->pid == 0 && c->p_component->fn_click)
+      c->p_component->fn_click();
   }
 }
 

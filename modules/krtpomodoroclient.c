@@ -71,6 +71,5 @@ void toggle_pomodoro() {
   int s = get_connection();
   write(s, buf, strlen(buf));
   int b = read(s, recbuf, 2048);
-  // printf("B:%s\n", recbuf);
   close_connection(s);
 }

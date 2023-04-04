@@ -9,27 +9,14 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <time.h>
 #include <unistd.h>
 
-typedef __uintmax_t uintmax_t;
-
 void gw(char *buffer) {}
-extern void get_pomodoro_status(char *buffer);
 extern void setupsignals();
 extern void abrthandler();
 extern void chldhandler();
 
 component_control *p_components;
-
-void get_date_time(char *buffer) {
-  time_t t = time(NULL);
-  struct tm *tm = localtime(&t);
-
-  size_t ret =
-      strftime(buffer, MAX_COMPONENT_BUFFER, " %d-%m-%Y %H:%M:%S", tm);
-  /* strftime(buffer, MAX_COMPONENT_BUFFER, " %a %d-%m-%Y %H:%M:%S", tm);*/
-}
 
 void exec_command(const char *command, char *buffer) {
   FILE *fp;
@@ -47,60 +34,6 @@ void exec_command(const char *command, char *buffer) {
 
   /* close */
   pclose(fp);
-}
-
-uintmax_t read_memory() {
-  uintmax_t memfree = 0;
-  uintmax_t memtotal = 0;
-  uintmax_t memavailable = 0;
-  uintmax_t buffers = 0, cached = 0;
-
-  int n;
-
-  n = pscanf("/proc/meminfo",
-             "MemTotal: %ju kB\n"
-             "MemFree: %ju kB\n"
-             "MemAvailable: %ju kB\n"
-             "Buffers: %ju kB\n"
-             "Cached: %ju kB\n",
-             &memtotal, &memfree, &memavailable, &buffers, &cached);
-
-  uintmax_t used = (memtotal - memfree - buffers - cached) / 1024;
-  /* memtotal = memtotal / 1024;
-  printf("%d %ju %ju %ju %ju\n", n, memtotal, memfree, buffers, cached);
-  printf("USED: %ju\n", used); */
-
-  return used;
-}
-
-void get_used_mem(char *buffer) {
-  snprintf(buffer, MAX_COMPONENT_BUFFER, " %lu Mb", read_memory());
-}
-
-void get_battery_state(char *buffer) {
-  char *bs[] = {"", "", "", "", ""};
-  int mx[] = {90, 60, 40, 20, 10};
-  int capacity;
-  char status[12];
-  pscanf("/sys/class/power_supply/BAT0/capacity", "%d", &capacity);
-  pscanf("/sys/class/power_supply/BAT0/status", "%12[a-zA-Z ]", &status);
-
-  char *r;
-  char *s;
-
-  for (int j = 0; j < 5; j++) {
-    if (capacity > mx[j]) {
-      r = bs[j];
-      break;
-    }
-  }
-
-  if (strncmp(status, "Discharging", 12) == 0)
-    s = ""; /* "🔋"; */
-  else
-    s = "";
-
-  snprintf(buffer, MAX_COMPONENT_BUFFER, "%s %s %d%%", s, r, capacity);
 }
 
 Display *dpy = NULL;
@@ -135,11 +68,7 @@ int main_loop() {
 
   size_t cl = sizeof(components) / sizeof(component);
 
-  /* const char *buffer_weather = components[0].buffer;
-  const char *buffer_pomodoro = components[1].buffer;
-  const char *battery_buffer = components[2].buffer;
-  const char *mem_buffer = components[3].buffer;
-  const char *tm_buffer = components[4].buffer; */
+  u_int64_t tick = 0;
 
   do {
     char cr[] = {(char)31, '\0'};
@@ -150,10 +79,12 @@ int main_loop() {
       const component *c = cc->p_component;
       char bg[10];
       strncpy(bg, c->bg_color, 10);
-      if (c->fn)
-        c->fn(cc->buffer);
-      else if (c->s)
-        exec_command(c->s, cc->buffer);
+      if (tick % c->upd_time == 0) {
+        if (c->fn)
+          c->fn(cc->buffer);
+        else if (c->s)
+          exec_command(c->s, cc->buffer);
+      }
 
       strncat(output, bg, 8000);
       bg[1] = 'c';
@@ -167,8 +98,8 @@ int main_loop() {
 
     write_status(output);
     sleep(1);
+    tick++;
 
-    /* char *s = "🔌 🔋   JIKONIK Hola mundo mundial!"; */
   } while (1);
   return 0;
 }
