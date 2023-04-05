@@ -4,41 +4,58 @@
 #include <string.h>
 #include <sys/stat.h>
 
+/* Icons @ https://openweathermap.org/weather-conditions */
+/* https://www.alt-codes.net/weather-symbols.php */
 #define ICLOUD ""
 
 #define I1D "" /* 01d, 01n */
 #define I1N "" /* 01d, 01n */
-#define I2D "🌤"   /* 02d, 03d, 04d */
-#define I2N "" /* 02n, 03n, 04n */
-#define I3 "🌦"    /* 09d, 09n, 10d, 10n */
-#define I4 "🌧"    /* 11d, 11n */
-#define I5 "🌨"    /* 13d, 13n */
-#define I6 "🌫"    /* 50d, 50n */
-#define I0 " "    /* 50d, 50n */
+#define I2 "🌤"    /* 02d, 03d, 04d */
+#define I4 ""
+#define I9 "🌦"  /* 09d, 09n, 10d, 10n */
+#define I10 "🌨" /* 13d, 13n */
+#define I11 "⛈"
+#define I13 ""
+#define I50 "🌫" /* 50d, 50n */
+#define I0 " "
+
+const char *filename = "/home/jicg/.cache/krt-weather.json";
 
 char *get_icon(const char *icon) {
-  if (strncmp(icon, "01d", 3) == 0) {
-    return I1D;
-  } else if (strncmp(icon, "01n", 3) == 0) {
-    return I1N;
-  } else if (strncmp(icon, "03", 2) == 0) {
-    return ICLOUD;
-  } else if (strncmp(icon, "11", 2) < 0) {
-    if (icon[2] == 'd')
-      return I2D;
-    else
-      return I2N;
-  } else if (strncmp(icon, "12", 2) < 0) {
-    return I3;
-  } else if (strncmp(icon, "14", 2) < 0) {
+  char d = icon[2];
+  int n = atoi(icon);
+
+  switch (n) {
+  case 1:
+    return d == 'd' ? I1D : I1N;
+    break;
+  case 2:
+  case 3:
+    return I2;
+    break;
+  case 4:
     return I4;
-  } else if (strncmp(icon, "50", 2) == 0) {
-    return I5;
+    break;
+  case 9:
+    return I9;
+    break;
+  case 10:
+    return I10;
+    break;
+  case 11:
+    return I11;
+    break;
+  case 13:
+    return I13;
+    break;
+  case 50:
+    return I50;
+    break;
   }
+
   return I0;
 }
 
-const char *filename = "/home/jicg/.cache/eleg-weather.json";
 void get_weather(char *output) {
   int max_size = 2048;
   struct stat st;
