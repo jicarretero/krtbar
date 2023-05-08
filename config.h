@@ -9,16 +9,21 @@ void get_date_time(char *output);
 
 void toggle_pomodoro();
 
-#define FI(f) f, NULL
-#define SE(s) NULL, s
+#define FUNCTION(f) f, NULL
+#define SCRIPT(s) NULL, s
+#define NOTHING NULL, NULL
 
 static const component components[] = {
-    {FI(get_weather), 600, FG1, BG1, FI(NULL)},
-    {FI(get_pomodoro_status), 1, FG2, BG2, FI(toggle_pomodoro)},
-    {FI(get_battery_state), 10, FG1, BG1, SE(NULL)},
-    {FI(get_used_mem), 5, FG2, BG2, SE(NULL)},
-    {SE("/home/jicg/bin/qsound.sh"), 1, FG1, BG1, SE("/usr/bin/pavucontrol")},
-    {FI(get_date_time), 10, FG2, BG2, SE("/usr/bin/gsimplecal")}};
+    {SCRIPT("/home/jicg/.local/bin/playing.sh"), 1, FG2, BG2,
+     SCRIPT("/usr/bin/playerctl play-pause")},
+    {FUNCTION(get_weather), 600, FG1, BG1, NOTHING},
+    {FUNCTION(get_pomodoro_status), 1, FG2, BG2, FUNCTION(toggle_pomodoro)},
+    {FUNCTION(get_battery_state), 10, FG1, BG1, NOTHING},
+    {FUNCTION(get_used_mem), 5, FG2, BG2, NOTHING},
+    {SCRIPT("/home/jicg/.local/bin/qsound.sh"), 1, FG1, BG1,
+     SCRIPT("/usr/bin/pavucontrol")},
+    {FUNCTION(get_date_time), 10, FG2, BG2, SCRIPT("/usr/bin/gsimplecal")},
+};
 
 /* static const component components[] = {
     {get_weather, NULL, 600, FG1, BG1, NULL},

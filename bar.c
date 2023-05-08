@@ -32,6 +32,10 @@ void exec_command(const char *command, char *buffer) {
   while (fgets(buffer, MAX_COMPONENT_BUFFER, fp) != NULL)
     ;
 
+  /* Remove \n as the last character after running the script ...*/
+  int l = strlen(buffer) - 1;
+  buffer[l] = buffer[l] == '\n' ? 0 : buffer[l];
+
   /* close */
   pclose(fp);
 }

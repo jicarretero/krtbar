@@ -113,7 +113,7 @@ void get_weather(char *output) {
     }
   }
 
-  snprintf(output, max_size, "%s %s, %s %03.2fºC", get_icon(sicon), city, descr,
-           celsius);
+  snprintf(output, max_size, "%s  %s, %s %03.2fºC", get_icon(sicon), city,
+           descr, celsius);
   cJSON_Delete(json);
 }

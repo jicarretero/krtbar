@@ -26,5 +26,5 @@ void get_battery_state(char *buffer) {
     s = "";
 
   /* char *s = "🔌 🔋   JIKONIK Hola mundo mundial!"; */
-  snprintf(buffer, MAX_COMPONENT_BUFFER, "%s %s %d%%", s, r, capacity);
+  snprintf(buffer, MAX_COMPONENT_BUFFER, "%s %s  %d%%", s, r, capacity);
 }

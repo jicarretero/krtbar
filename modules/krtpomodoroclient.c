@@ -15,12 +15,14 @@ extern int errno;
 #define pomodoro_paused "^c#ff0000^"
 #define pomodoro_break "^c#ffff00^"
 
+void close_connection(int s) { close(s); }
+
 int get_connection() {
   struct sockaddr_in server, cli;
   int s;
   int port = 4884;
   if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-    exit(3);
+    return s;
   }
   // int flags = fcntl(s, F_GETFL, 0);
   //  fcntl(s, F_SETFL, flags | O_NONBLOCK);
@@ -31,18 +33,22 @@ int get_connection() {
   server.sin_port = htons(4884);
 
   if (connect(s, (struct sockaddr *)&server, sizeof(server)) < 0) {
-    exit(4);
+    // Can't connect
+    close_connection(s);
+    s = -1;
   }
   return s;
 }
-
-void close_connection(int s) { close(s); }
 
 void get_pomodoro_status(char *buffer) {
   int max = 2048;
   char *buf = "GET /pomodoro\r\n\n";
   char recbuf[2048] = {0};
   int s = get_connection();
+  if (s < 0) {
+    snprintf(buffer, max, " NO POMODORO %d", errno);
+    return;
+  }
   write(s, buf, strlen(buf));
   int b = read(s, recbuf, 2048);
 
