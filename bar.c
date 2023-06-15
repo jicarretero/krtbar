@@ -18,28 +18,6 @@ extern void chldhandler();
 
 component_control *p_components;
 
-void exec_command(const char *command, char *buffer) {
-  FILE *fp;
-
-  /* Open the command for reading. */
-  fp = popen(command, "r");
-  if (fp == NULL) {
-    printf("Failed to run command\n");
-    exit(1);
-  }
-
-  /* Read the output a line at a time - output it. */
-  while (fgets(buffer, MAX_COMPONENT_BUFFER, fp) != NULL)
-    ;
-
-  /* Remove \n as the last character after running the script ...*/
-  int l = strlen(buffer) - 1;
-  buffer[l] = buffer[l] == '\n' ? 0 : buffer[l];
-
-  /* close */
-  pclose(fp);
-}
-
 Display *dpy = NULL;
 Window root;
 
@@ -98,6 +76,7 @@ int main_loop() {
       strncat(output, c->fg_color, 8000);
       strncat(output, cc->buffer, 8000);
       strncat(output, " ", 8000);
+      strncat(output, separator, 8000);
     }
 
     write_status(output);

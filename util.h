@@ -1,3 +1,4 @@
+#include "defs.h"
 #include <sys/types.h>
 
 #ifndef __UTIL_H__
@@ -29,5 +30,6 @@ typedef __builtin_va_list __gnuc_va_list;
 #endif
 
 extern int pscanf(const char *path, const char *fmt, ...);
+extern void exec_command(const char *command, char *buffer);
 
 #endif

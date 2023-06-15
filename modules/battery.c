@@ -2,6 +2,8 @@
 #include "../util.h"
 #include <string.h>
 
+int notified = 0;
+
 void get_battery_state(char *buffer) {
   char *bs[] = {"", "", "", "", ""};
   int mx[] = {90, 60, 40, 20, 10};
@@ -20,10 +22,16 @@ void get_battery_state(char *buffer) {
     }
   }
 
-  if (strncmp(status, "Discharging", 12) == 0)
+  if (strncmp(status, "Discharging", 12) == 0) {
+    if (capacity < 10 && !notified) {
+      exec_command("notify-send -u critical \"Battery Too Low!\"", buffer);
+      notified = 1;
+    }
     s = ""; /* "🔋"; */
-  else
+  } else {
+    notified = 0;
     s = "";
+  }
 
   /* char *s = "🔌 🔋   JIKONIK Hola mundo mundial!"; */
   snprintf(buffer, MAX_COMPONENT_BUFFER, "%s %s  %d%%", s, r, capacity);

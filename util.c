@@ -1,6 +1,8 @@
 #include "util.h"
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 extern int errno;
 
@@ -21,4 +23,26 @@ int pscanf(const char *path, const char *fmt, ...) {
   fclose(fp);
 
   return (n == EOF) ? -1 : 0;
+}
+
+void exec_command(const char *command, char *buffer) {
+  FILE *fp;
+
+  /* Open the command for reading. */
+  fp = popen(command, "r");
+  if (fp == NULL) {
+    printf("Failed to run command\n");
+    exit(1);
+  }
+
+  /* Read the output a line at a time - output it. */
+  while (fgets(buffer, MAX_COMPONENT_BUFFER, fp) != NULL)
+    ;
+
+  /* Remove \n as the last character after running the script ...*/
+  int l = strlen(buffer) - 1;
+  buffer[l] = buffer[l] == '\n' ? 0 : buffer[l];
+
+  /* close */
+  pclose(fp);
 }
