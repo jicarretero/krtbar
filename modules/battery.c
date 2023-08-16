@@ -23,7 +23,7 @@ void get_battery_state(char *buffer) {
   }
 
   if (strncmp(status, "Discharging", 12) == 0) {
-    if (capacity < 10 && !notified) {
+    if (capacity < 15 && !notified) {
       exec_command("notify-send -u critical \"Battery Too Low!\"", buffer);
       notified = 1;
     }
