@@ -15,28 +15,28 @@ void toggle_builtin_pomodoro();
 #define SCRIPT(s) NULL, s
 #define NOTHING NULL, NULL
 
-static const char *separator = "";
+static const char *separator = "| ";
 
 static const component components[] = {
-    {SCRIPT("/home/jicg/.local/bin/playing.sh"), 1, FG2, BG2,
+    {SCRIPT("/home/jicg/.local/bin/playing.sh"), 1, FG2, BG1,
      SCRIPT("/usr/bin/playerctl play-pause")},
     {FUNCTION(get_weather), 600, FG1, BG1, NOTHING},
-    /*    {FUNCTION(get_pomodoro_status), 1, FG2, BG2,
+    /*    {FUNCTION(get_pomodoro_status), 1, FG2, BG1,
        FUNCTION(toggle_pomodoro)}, */
-    {FUNCTION(get_builtin_pomodoro_status), 1, FG2, BG2,
+    {FUNCTION(get_builtin_pomodoro_status), 1, FG2, BG1,
      FUNCTION(toggle_builtin_pomodoro)},
     {FUNCTION(get_battery_state), 10, FG1, BG1, NOTHING},
-    {FUNCTION(get_used_mem), 5, FG2, BG2, NOTHING},
+    {FUNCTION(get_used_mem), 5, FG2, BG1, NOTHING},
     {SCRIPT("/home/jicg/.local/bin/qsound.sh"), 1, FG1, BG1,
      SCRIPT("/usr/bin/pavucontrol")},
-    {FUNCTION(get_date_time), 10, FG2, BG2, SCRIPT("/usr/bin/gsimplecal")},
+    {FUNCTION(get_date_time), 10, FG2, BG1, SCRIPT("/usr/bin/gsimplecal")},
 };
 
 /* static const component components[] = {
     {get_weather, NULL, 600, FG1, BG1, NULL},
-    {get_pomodoro_status, NULL, 1, FG2, BG2,
+    {get_pomodoro_status, NULL, 1, FG2, BG1,
      "/usr/bin/curl -X POST localhost:4884/pomodoro/toggle"},
     {get_battery_state, NULL, 10, FG1, BG1, NULL},
-    {get_used_mem, NULL, 5, FG2, BG2, NULL},
+    {get_used_mem, NULL, 5, FG2, BG1, NULL},
     {NULL, "/home/jicg/bin/qsound.sh", 1, FG1, BG1, "/usr/bin/pavucontrol"},
-    {get_date_time, NULL, 10, FG2, BG2, "/usr/bin/gsimplecal"}}; */
+    {get_date_time, NULL, 10, FG2, BG1, "/usr/bin/gsimplecal"}}; */

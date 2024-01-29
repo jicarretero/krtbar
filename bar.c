@@ -72,11 +72,11 @@ int main_loop() {
       bg[1] = 'c';
       strncat(output, bg, 8000);
       strncat(output, cr, 8000);
-      strncat(output, " ", 8000);
       strncat(output, c->fg_color, 8000);
-      strncat(output, cc->buffer, 8000);
-      strncat(output, " ", 8000);
       strncat(output, separator, 8000);
+      strncat(output, cc->buffer, 8000);
+      strncat(output, c->fg_color, 8000);
+      strncat(output, " ", 8000);
     }
 
     write_status(output);
