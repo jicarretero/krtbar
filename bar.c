@@ -53,7 +53,7 @@ int main_loop() {
   u_int64_t tick = 0;
 
   do {
-    char cr[] = {(char)31, '\0'};
+    char cr[] = {'\x01', '\0'};
     char output[8192] = {0};
     component_control *cc = (component_control *)p_components;
     char fgfoocolor[20] = {};
@@ -68,15 +68,16 @@ int main_loop() {
           exec_command(c->s, cc->buffer);
       }
 
+      strncat(output, cr, 8000);
       strncat(output, bg, 8000);
       bg[1] = 'c';
       strncat(output, bg, 8000);
-      strncat(output, cr, 8000);
       strncat(output, c->fg_color, 8000);
       strncat(output, separator, 8000);
       strncat(output, cc->buffer, 8000);
       strncat(output, c->fg_color, 8000);
       strncat(output, " ", 8000);
+      cr[0]++;
     }
 
     write_status(output);

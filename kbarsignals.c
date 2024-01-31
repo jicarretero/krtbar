@@ -44,8 +44,10 @@ void chldhandler(int sig) {
 void abrthandler(int sig) { abort(); }
 
 void signal_handler(int signum, siginfo_t *info, void *context) {
-  int blk = info->si_value.sival_int - 1;
-  if (signum == SIGRTMIN) {
+  int btn = info->si_value.sival_int;
+  int blk = signum - SIGRTMIN - 1;
+  printf("Running signal_handler %d  %d\n", signum - SIGRTMIN, blk);
+  if (blk < 31) {
     component_control *c = &p_components[blk];
     if (c->pid == 0 && c->p_component->on_click)
       c->pid = run(c->p_component->on_click);
@@ -80,7 +82,7 @@ void setupsignals() {
   struct sigaction sa;
   printf("Setting up signals\n");
 
-  for (int i = 0; i < 20; i++) {
+  for (int i = 1; i <= 31; i++) {
     struct sigaction sa;
     sa.sa_sigaction = signal_handler;
     sa.sa_flags = SA_SIGINFO;
