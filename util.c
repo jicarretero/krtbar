@@ -31,8 +31,7 @@ void exec_command(const char *command, char *buffer) {
   /* Open the command for reading. */
   fp = popen(command, "r");
   if (fp == NULL) {
-    printf("Failed to run command\n");
-    exit(1);
+    strncpy(buffer, " ERR ", 6);
   }
 
   /* Read the output a line at a time - output it. */
