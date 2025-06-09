@@ -13,8 +13,8 @@
 
 void gw(char *buffer) {}
 extern void setupsignals();
-extern void abrthandler();
-extern void chldhandler();
+extern void abrthandler(int);
+extern void chldhandler(int);
 
 component_control *p_components;
 
