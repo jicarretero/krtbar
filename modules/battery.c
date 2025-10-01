@@ -43,7 +43,7 @@ void get_battery_state(char *buffer) {
       }
       s = "";
     } else {
-      low_notified = 0;
+      high_notified = 0;
       s = ""; /* "🔋"; */
     }
 
